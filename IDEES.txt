@@ -1,0 +1,16 @@
+# --- RANDOM
+o Créer un logo 
+o Bouton 'réinitialiser'
+o Menu déroulant pour montrer cas de figure directement
+
+# --- CONTENU
+# PIP
+o PIP [+coexistence]
+
+# DYNAMIQUES DES POPS
+o Sélection du nombre de phénotypes en compétition
+o Représentation des courbes de dynamique
+
+# INFLUENCE ALPHA COEXISTENCE
+o Arbre de coexistence
+o Nombre de phénotype survivant

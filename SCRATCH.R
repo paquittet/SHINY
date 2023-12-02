@@ -8,7 +8,7 @@ setwd("C:/Users/p_a_8/OneDrive/Bureau/M2 MODE/COURS/Semestre 3/FACE/COLLECTION")
 # UI ----------------------------------------------------------------------
 ui <- fluidPage(
   # TITRE
-  titlePanel("Mon application"),
+  titlePanel(img(src = "logo_rennes1.png", height = 140*.9, width = 300*.9)),
   
   # LAYOUT OF INTERFACE 
   sidebarLayout(
@@ -37,8 +37,7 @@ ui <- fluidPage(
                  ),
     
     # Section of output of the shiny application
-    mainPanel(img(src = "logo_rennes1.png", height = 140, width = 300), 
-              h1("MainPanel"),
+    mainPanel(h1("MainPanel"),
               br(),  # Saut de ligne
               h2("Description"),
               p("Projet de M2 MODE : dynamique adaptative"),
@@ -61,15 +60,23 @@ server <- function(input,  # stocke les valeurs / arguments des widgets (e.g. in
                    ) 
   {
   
+  # CODE R 'fixe' A NE RUN QU'UNE SEULE FOIS
+  iris <- iris
+  
+  
   # CODE R POTENTIELLEMENT REACTIF
+  # /!\ Tout ce qu'il a dedans est re-run à chaque manipulation de widget
+  
   output$reactive_text <- renderText(
     {
-      paste("C'est le texte : ", input$myslider, " et ", input$myactionbutton)
+          paste("C'est le texte : ",
+                input$myslider,
+                " et ",
+                input$myactionbutton
+                )
     }
   )
 }
-
-
 
 
 # APPLICATION -------------------------------------------------------------
