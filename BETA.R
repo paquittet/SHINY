@@ -1,7 +1,7 @@
 #
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
-#
+#data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAWElEQVR42mNgGPTAxsZmJsVqQApgmGw1yApwKcQiT7phRBuCzzCSDSHGMKINIeDNmWQlA2IigKJwIssQkHdINgxfmBBtGDEBS3KCxBc7pMQgMYE5c/AXPwAwSX4lV3pTWwAAAABJRU5ErkJggg==
 # Find out more about building applications with Shiny here:
 #
 #    http://shiny.rstudio.com/

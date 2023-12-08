@@ -1,0 +1,367 @@
+---
+title: "UE FACE (Pierre-Alexandre QUITTET)"
+author: ""
+date: ""
+output:
+  flexdashboard::flex_dashboard:
+    orientation: column
+    theme: lumen
+    vertical_layout: fill 
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T)
+```
+
+```{r, echo = F}
+source("FONCTIONS/FONCTIONS.R")
+```
+
+```{r, echo = F, eval = F}
+# library(flexdashboard)
+# library(shiny)
+# library(tidyverse)
+# library(latex2exp)
+```
+
+# # Introduction à la dynamique évolutive
+
+## Column {data-width="500"}
+
+### INTRODUCTION
+
+La dynamique adaptative est un cadre théorique permettant de modéliser l'évolution phénotypique. Elle permet de comprendre les conséquences à long-terme de petites mutations phénotypique sur la trajectoire évolutive des traits considérés. Ce cadre de recherche associe les méthodes de dynamique de population et les concepts de sélection fréquence-dépendance issue de la théorie des jeux (Maynard-Smith, 1973). La sélection fréquence-dépendance s'inscrit dans le paradigme de paysage adaptatif de fitness dynamique, où la fréquence des phénotypes dans la population influence la fitness de ces phénotypes.\
+La paradigme de modélisation classique utilisée consiste à considérer une population résidente et une population de mutant à faible densité dont le phénotype diffère légèrement de la population résidente.
+
+L'étude de la dynamique adaptative de phénotypes reposent sur deux idées fondamentales (Brännström et al., 2013) :\
+$\quad$ **(1)** la population résidente est supposée être en équilibre dynamique lorsque de nouveaux mutants apparaissent\
+$\quad$ **(2)** l'avenir de ces mutants peut être déduit de leur taux de croissance initial lorsqu'ils sont rares dans la population résidente
+
+\
+
+Ici les populations sont considérées **monomorphiques** : tous les individus d'un même phénotype donnée partagent la même valeur de trait. On considérera également une **reproduction clonale** (les individus donneront naissance à des individus de même trait).
+
+\
+
+# # Invasion d'un mutant
+
+## Column {.sidebar data-width="200"}
+
+```{r, echo = F}
+
+width_widget = 200 # taille des widgets
+
+#  FONCTION K 
+                 # Widget_slider : K_0
+                 sliderInput(
+                   inputId = "k0",
+                   label = "$$K_0$$",
+                   min = .5,
+                   max = 1.5,
+                   step = 0.1,
+                   value = 1,
+                   width = width_widget
+                   # width = width_widget
+                 )
+                 
+                 # Widget_slider : lambda
+                 sliderInput(
+                   inputId = "lambda",
+                   label = "$$\\lambda$$",
+                   min = 0,
+                   max = 5,
+                   step = 0.1,
+                   value = 1,
+                   width = width_widget
+                   # width = width_widget
+                 )
+                 
+ # FONCTION a()                
+                   # Widget_slider : lambda
+                 sliderInput(
+                   inputId = "sigma",
+                   label = "$$\\sigma$$",
+                   min = 0.01,
+                   max = 5,
+                   step = 0.01,
+                   value = .5,
+                   width = width_widget
+                 )
+  
+                 br()
+# Afficher ou non les PIP
+selectInput("activation_pip", label = "Affichage des PIP",
+            choices = c("Non", "Oui"), selected = "Non")
+```
+
+## Column {data-width="600"}
+
+### **<font color='blue'>THEORIE</font>**
+
+On cherche à modéliser la compétition entre 2 traits phénotypiques $x_i$ et $x_j$ en compétition. On utilise l'équation de compétition de Lotka-Volterra :
+
+\
+
+$$
+\large{
+\begin{cases}
+\frac{dn_i}{dt} = rn_i \Big[1 - \frac{\sum_{j = 1}^{2}a(x_i, x_j) n_j}{K(x_i )} \Big]\\
+\\
+\frac{dn_j}{dt} = rn_j \Big[1 - \frac{\sum_{i = 1}^{2}a(x_j, x_i) n_i}{K(x_j )} \Big]
+\end{cases}
+}
+$$
+
+Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x_i$ ($x_j$) le phénotype de l'espère $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r$ est identique pour les deux phénotypes. Les phénotypes sont en compétition car elles exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x_i, x_j)$.
+
+## Column {data-width="500"}
+
+### **<font color='blue'>FONCTION DE RESSOURCES K(x)</font>** 
+
+$\small{K(x) = K_0 - \lambda (x - x_0)^2}$
+
+```{r, echo = F, cache = F}
+
+  x <- seq(0, 2, length.out = 100)
+
+
+  renderPlot({
+  par(pty = "s")
+  par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
+  plot(
+    x = x,
+    y = k_f(x = x, k0 = input$k0, x0 = 1, lambda = input$lambda),
+    lwd = 2,
+    col = "#7eb606",
+    ylim = c(0, input$k0),
+    xlim = c(0, 2),
+    type = "l",
+    xlab = TeX("x"),
+    ylab = TeX("K(x)"),
+    cex.lab = 1.2,
+    bty = "n"  # Supprime le cadre autour du plot
+  )
+})
+
+    
+```
+
+
+### **<font color='blue'>FONCTION DE COMPETITION a(x, y)</font>** 
+
+$a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/\sigma_a ^2}$
+
+```{r, cache = F, echo = F}
+# Définition des valeurs de traits
+    x1 <- seq(0, 2, length.out = 100)
+    x2 <- seq(2, 0, length.out = 100)
+    
+    d = x1 - x2
+    
+    # Aspect ratio = square
+    par(pty = "s")
+   
+    renderPlot({
+  # par(pty = "s")
+  par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
+   plot(
+      a_f(x1 = x1, x2 = x2, sigma = input$sigma) ~ d, 
+      lwd = 2,
+      col = "#CD3333",
+      ylim = c(0, 1),
+      xlim = c(min(d), max(d)),
+      type = "l",
+      xlab = TeX("$x_i - x_j$"),
+      ylab = TeX("$a(x_i - x_j)$"),
+      cex.lab = 1.2,
+      bty = "n"
+    )
+})
+```
+
+
+## Column {data-width="500" .tabs}
+
+### **<font color='blue'>PAIRWISE INVASIBILITY PLOT</font>** 
+$s(x_i, x_j) = r \Bigg[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \Bigg]$
+
+```{r, echo = F, cache = F}
+# Traits des 2 phénotypes testés
+x = seq(0.01, 1.99, 0.004)
+y = seq(0.01, 1.99, 0.004)
+
+
+
+# Activation ou non des PIP
+
+  
+
+  renderPlot({
+  if(input$activation_pip == "Oui"){
+    
+  par(mfrow = c(3, 1))
+  # Paramètre graphique
+  par(mar = c(8, 4, 0, 2),
+    mgp = c(2.5,  # proximité label et axe
+            1,  # proximité ticks
+            0)  # proximité axes
+    )
+  
+k0 <- input$k0
+lambda <- input$lambda
+sigma <- input$sigma
+
+# ---------------------- SIGMA = 1 ---------------------------------
+# On modifie la valeur par défaut de Sigma
+a_f <- function(x1, x2) {
+  a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
+  return(a)
+}
+
+k_f <- function(x) {
+  x0 = 1
+  k0 = k0
+  lambda = lambda
+  k <- k0 - lambda*(x - x0)^2
+  
+  return(k)
+  
+}
+
+fitness_f <- function(x1, x2){
+  r = 1
+  s <- r*(1 - (a_f(x1, x2) * (k_f(x1) / k_f(x2))))
+  return(s)
+}
+
+# outer() créer une matrice croisé x~y avec les résultats de la fonction fitness_f() pour toutes les combinaisons de x / y
+z <- outer(x, y, fitness_f)  
+
+# On binarise avec 0 pour s(x, y) < 0 et 1 pour s(x, y) > 0
+z <- apply(z, MARGIN = 2, FUN = function(x) ifelse(x<=0, 0, 1))
+
+
+
+# Fonction filled.contour modifiée pour contrôle graphique (voir chunk caché [echo = F] du dessus pour détails)
+par(cex.lab = 1.2, cex.axis = 1.2)  # On change la taille par défaut des axes
+
+ # Aspect ratio = square
+    par(pty = "s")
+     
+# Graphique simple
+filled.contour.modif(
+                    x = x,
+                    y = y,
+                    z = z,
+                    col = c("white", "#a6cde9"),
+                    xlab = "Résident",
+                    ylab = "Mutant",
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
+                    cex.lab = 1.8,
+                    key.axes = F
+)
+
+
+
+# On inverse les valeurs des axes
+z_rev <- apply(z, MARGIN = 1, FUN = rev)
+
+filled.contour.modif(
+                    x = y,
+                    y = x,
+                    z = z_rev,
+                    col = c("white", "#ffdf7f"),
+                    xlab = "Mutant",
+                    ylab = "Résident",
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
+                    cex.lab = 1.8,
+                    key.axes = F
+)
+
+
+
+# SUPERPOSITION
+# Graphique s(x, y)
+filled.contour.modif(
+                    x = x,
+                    y = y,
+                    z = z,
+                    col = c(adjustcolor("white", alpha.f = 0), adjustcolor("#ffdf7f", alpha.f = 1)),
+                    xlab = NULL,
+                    ylab = NULL,
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
+                    cex.lab = 1.8,
+                    key.axes = F
+)
+
+par(new = TRUE)  # permet la superposition des graphiques
+
+# Graphique s(y, x)
+filled.contour.modif(
+                    x = x,
+                    y = y,
+                    z = z_rev,
+                    col = c(adjustcolor("white", alpha.f = 0), adjustcolor("#a6cde9", alpha.f = 1)),
+                    xlab = NULL,
+                    ylab = NULL,
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
+                    key.axes = F
+)
+
+par(new = TRUE)  # permet la superposition des graphiques
+
+# On extrait les lignes où les deux valeurs de s(x, y) sont positives
+coex_row <- which(z == 1 & z_rev == 1)
+z_coex <- z
+z_coex[-coex_row] <- 0
+
+# Graphique s(x, y) & s(y, x) > 0
+filled.contour.modif(
+                    x = x,
+                    y = y,
+                    z = z_coex,
+                    col = c(adjustcolor("white", alpha.f = 0), adjustcolor("#7eb606", alpha.f = 1)),
+                    xlab = NULL,
+                    ylab = NULL,
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
+                    key.axes = F
+)
+}
+})
+
+
+
+  
+```
+
+
+
+# # Ressources
+
+## Column {data-width="500"}
+
+### **DOCUMENTATION**
+
+Tutoriel shiny : <https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html>
+
+Tutoriel flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>
+
+Lien GitHub de l'auteur : <https://github.com/paquittet/SHINY>
+
+Série de vidéos d'introduction : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
