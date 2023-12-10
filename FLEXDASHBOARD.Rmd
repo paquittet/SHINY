@@ -23,6 +23,7 @@ source("FONCTIONS/FONCTIONS.R")
 # library(shiny)
 # library(tidyverse)
 # library(latex2exp)
+# library(numDeriv)
 ```
 
 # # Introduction à la dynamique évolutive
@@ -64,6 +65,18 @@ width_widget = 200 # taille des widgets
                    width = width_widget
                    # width = width_widget
                  )
+# # X0                 
+#                  # Widget_slider : x_0
+#                  sliderInput(
+#                    inputId = "x0",
+#                    label = "$$x_0 \\text{ [Optimum]}$$",
+#                    min = 0.1,
+#                    max = 1.9,
+#                    step = 0.1,
+#                    value = 1,
+#                    width = width_widget
+#                    # width = width_widget
+#                  )
                  
                  # Widget_slider : lambda
                  sliderInput(
@@ -81,18 +94,15 @@ width_widget = 200 # taille des widgets
                    # Widget_slider : lambda
                  sliderInput(
                    inputId = "sigma",
-                   label = "$$\\sigma \\text{ [Intensité compétition]}$$",
+                   label = "$$\\sigma^2 \\text{ [Intensité compétition]}$$",
                    min = 0.01,
-                   max = 5,
+                   max = 2,
                    step = 0.01,
                    value = .5,
                    width = width_widget
                  )
 
                  br()
-# Afficher ou non les PIP
-selectInput("activation_pip", label = "Affichage des PIP",
-            choices = c("Non", "Oui"), selected = "Non")
 
 # Bouton de reset aux valeurs inititales
 actionButton(inputId = "reset", label = "Reset")
@@ -103,8 +113,15 @@ observe({input$reset
 
   })
 
+# Bouton Affichage PIP
+actionButton(inputId = "pip", label = "PIP")
+
 # Pour que la valeur max de lambda soit celle de k0
 observe({updateSliderInput(inputId = "lambda", max = input$k0)})
+
+# Afficher ou non les PIP
+# selectInput("activation_pip", label = "Affichage des PIP",
+#             choices = c("Non", "Oui"), selected = "Non")
 ```
 
 ## Column {data-width="600"}
@@ -125,7 +142,86 @@ $$
 }
 $$
 
-Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x_i$ ($x_j$) le phénotype de l'espère $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r$ est identique pour les deux phénotypes. Les phénotypes sont en compétition car elles exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x_i, x_j)$.
+Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x_i$ ($x_j$) le phénotype de l'espère $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r = 1$ est identique pour les deux phénotypes. Les phénotypes sont en compétition car elles exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x_i, x_j)$.  
+
+```{r, echo = F, cache = F}
+# Calcul équilibre
+# Reformatage de la fonction fitness
+# On modifie la valeur par défaut de Sigma
+
+ess_text <- renderText({
+  
+  a_f <- function(x1, x2) {
+    a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
+    return(a)
+  }
+
+  k_f <- function(x) {
+    x0 = 1
+    k <- input$k0 - input$lambda*(x - x0)^2
+    return(k)
+  }
+
+  fitness_f <- function(x){
+    x1 <- x[1]
+    x2 <- x[2]
+    r = 1
+    s <- r*(1 - (a_f(x1, x2) * (k_f(x1) / k_f(x2))))
+    return(s)
+  }
+
+  # ESS
+  ess <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2] 
+  if(ess <= 0){
+    value_ess <- "Stable"
+  } else {
+    value_ess <- "Instable"
+  }
+
+  return(value_ess)
+})
+
+
+convergence_text <- renderText({
+  
+  a_f <- function(x1, x2) {
+    a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
+    return(a)
+  }
+
+  k_f <- function(x) {
+    x0 = 1
+    k <- input$k0 - input$lambda*(x - x0)^2
+    return(k)
+  }
+
+  fitness_f <- function(x){
+    x1 <- x[1]
+    x2 <- x[2]
+    r = 1
+    s <- r*(1 - (a_f(x1, x2) * (k_f(x1) / k_f(x2))))
+    return(s)
+  }
+
+  # ESS
+  convergence <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2] + numDeriv::hessian(func = fitness_f, x = c(1, 1))[1,2]
+  if(convergence <= 0){
+    value_convergence <- "Stable"
+  } else {
+    value_convergence <- "Instable"
+  }
+
+  return(value_convergence)
+})
+
+```
+
+**Stabilité évolutive et convergence du point $x_0$ **  
+
+- **Stabilité évolutive** : `r ess_text` 
+- **Convergence évolutive** : `r convergence_text` 
+
+
 
 ## Column {data-width="500"}
 
@@ -204,12 +300,15 @@ x = seq(0.01, 1.99, 0.02)
 y = seq(0.01, 1.99, 0.02)
 
 
-  renderPlot({
-  if(input$activation_pip == "Oui"){ # Activation ou non des PIP
-    
+  renderPlot(width = , height = ,{
+  if(input$pip %% 2 == 1) { # Activation ou non des PIP
+  
+
   par(mfrow = c(3, 1))
   # Paramètre graphique
-  par(mar = c(8, 4, 0, 2),
+  par(
+    mar = c(8, 4, 0, 2), # marges intérieures
+    oma = c(0, 0, 0, 0), # marges extérieures
     mgp = c(2.5,  # proximité label et axe
             1,  # proximité ticks
             0)  # proximité axes
@@ -313,17 +412,19 @@ filled.contour.modif(
                     x = x,
                     y = y,
                     z = z_coex,
-                    col = c(adjustcolor("white", alpha.f = 0), adjustcolor("#7eb606", alpha.f = 1)),
+                    col = c(rgb(0, 0, 0, alpha = 0), adjustcolor("#7eb606", alpha.f = 1)),
                     xlab = NULL,
                     ylab = "Coexistence",
                     xlim = c(0, 2),
                     ylim = c(0, 2),
                     nlevels = 2,
                     las = 1,
+                    cex.lab = 1.8,
                     key.axes = F
 )
 }
-})
+  })
+  
 ```
 
 
