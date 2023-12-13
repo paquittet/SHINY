@@ -2,6 +2,7 @@
 o Créer un logo 
 o Bouton 'réinitialiser'
 o Menu déroulant pour montrer cas de figure directement
+o Ajouter le compte-rendu de TP (notamment pour la procédure de création de la matrice M)
 
 # --- CONTENU
 # PIP

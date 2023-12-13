@@ -104,3 +104,61 @@ filled.contour.modif <-
     invisible()
   }
 
+# MATRICE M
+M_matrix <- function(N = N, xmin = xmin, xmax = xmax, sigma = sigma, k0 = k0, lambda = lambda){
+  # DESCRIPTION 
+  #' @param N le nombre de phénotypes en compétition
+  #' @param xmin valeur minimum du phénotype
+  #' @param xmax valeur maximum du phénotype
+  #' @param x la valeur des traits pour chacun de ces phénotypes
+  #' @param sigma argument sigma de la fonction d'intensité de coefficient a(xi, xj) 
+  #' @param k0  valeur optimale d'utilisation de ressource de la fonction K(xN)
+  #' @param lambda forme de la courbe d'utilisation de ressource de la fonction K(xN)
+  #' 
+  #' @return La matrice M contenant les valeurs de a(xi, xj) / a(xi) [voir ci-dessus]
+  
+  
+  # FONCTION
+  x = seq(xmin, xmax, length.out = N)  # On répartit uniformément N fois les valeurs de trait entre xmin et xmax
+  x0 = 1 # On fixe x0 à 1.
+  
+  # Matrice des traits D
+  X = matrix(data = x, nrow = N, ncol = N, byrow = T)  # matrice des traits x1, ..., xN
+  D = X - t(X)  # Matrice des xi - xj
+  
+  # Matrice de compétition A
+  A = exp(-(D^2)/(2*(sigma)^2))  # Matrice des coefficients de compétition inter-traits
+  
+  # Matrice B contenant 1/KN
+  K <- c()
+  epsilon = 10^(-6)  # Pour ne pas avoir de 0 dans la matrice B
+  for(trait in x){   # Valeur de K(xN) par trait
+    K <- c(K, max( 0 + epsilon, k0 - lambda*((trait - x0))^2))
+  } 
+  
+  B_trans <-  matrix(data = K, nrow = N, ncol = N, byrow = T)  # Matrice K(xN)
+  B <-  apply(X = B_trans, MARGIN = 2, FUN = function(x) 1/x)  # 1 / Matrice K(xN)
+  
+  # Matrice M
+  M = A * B
+  
+  return(M)
+}
+
+LV_trait <- function(t, n, params){
+  # DESCRIPTION
+  #' @param t le temps
+  #' @param n la proportion initiale des phénotypes dans la population
+  #' @param params liste des arguments : [M] la matrice M issue de M_matrix() et [r] le(s) taux de croissance des populations
+  
+  
+  # FONCTION
+  # Initialisaton
+  r <- params[[1]]
+  M <- params[[2]]
+  
+  # Sortie
+  dn <-  r * n * (1 - n %*% M)
+  
+  return(list(dn))
+}

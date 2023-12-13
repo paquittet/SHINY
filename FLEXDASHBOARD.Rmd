@@ -6,12 +6,11 @@ output:
   flexdashboard::flex_dashboard:
     orientation: column
     theme: lumen
-    vertical_layout: fill 
 runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = T)
+knitr::opts_chunk$set(echo = TRUE, cache = F, echo = F)
 ```
 
 ```{r, echo = F}
@@ -19,11 +18,12 @@ source("FONCTIONS/FONCTIONS.R")
 ```
 
 ```{r, echo = F, eval = F}
-# library(flexdashboard)
-# library(shiny)
-# library(tidyverse)
-# library(latex2exp)
-# library(numDeriv)
+library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(latex2exp)
+library(numDeriv)
+library(deSolve)
 ```
 
 # # Introduction à la dynamique évolutive
@@ -45,7 +45,7 @@ Ici les populations sont considérées **monomorphiques** : tous les individus d
 
 \
 
-# # Invasion d'un mutant
+# # Compétition à deux phénotypes
 
 ## Column {.sidebar data-width="200"}
 
@@ -236,6 +236,7 @@ $\small{K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2}$
 
   renderPlot({
   par(pty = "s")
+
   par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
   plot(
     x = x,
@@ -245,8 +246,8 @@ $\small{K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2}$
     ylim = c(0, input$k0),
     xlim = c(0, 2),
     type = "l",
-    xlab = TeX("x"),
-    ylab = TeX("K(x)"),
+    xlab = latex2exp::TeX("x"),
+    ylab = latex2exp::TeX("K(x)"),
     cex.lab = 1.2,
     bty = "n"  # Supprime le cadre autour du plot
   )
@@ -273,6 +274,7 @@ $a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
     renderPlot({
   # par(pty = "s")
   par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
+      
    plot(
       a_f(x1 = x1, x2 = x2, sigma = input$sigma) ~ d, 
       lwd = 2,
@@ -280,8 +282,8 @@ $a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
       ylim = c(0, 1),
       xlim = c(min(d), max(d)),
       type = "l",
-      xlab = TeX("$x_i - x_j$"),
-      ylab = TeX("$a(x_i - x_j)$"),
+      xlab = latex2exp::TeX("$x_i - x_j$"),
+      ylab = latex2exp::TeX("$a(x_i - x_j)$"),
       cex.lab = 1.2,
       bty = "n"
     )
@@ -300,10 +302,10 @@ x = seq(0.01, 1.99, 0.02)
 y = seq(0.01, 1.99, 0.02)
 
 
-  renderPlot(width = , height = ,{
+  renderPlot({
   if(input$pip %% 2 == 1) { # Activation ou non des PIP
   
-
+  par(pty = "s")
   par(mfrow = c(3, 1))
   # Paramètre graphique
   par(
@@ -427,6 +429,258 @@ filled.contour.modif(
   
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # Compéttion à n phénotypes
+
+## Column {.sidebar data-width="200"}
+```{r, echo = F}
+
+width_widget = 200 # taille des widgets
+
+
+# NOMBRE DE PHENOTYPES
+                numericInput(inputId = "N", label = "Nombre de phénotypes", value = 2, min = 2, max = 50)
+#  FONCTION K 
+                 # Widget_slider : K_0
+                 sliderInput(
+                   inputId = "k0_n",
+                   label = "$$K_0 \\text{ [Optimum]}$$",
+                   min = .5,
+                   max = 1.5,
+                   step = 0.1,
+                   value = 1,
+                   width = width_widget
+                   # width = width_widget
+                 )
+# # X0                 
+#                  # Widget_slider : x_0
+#                  sliderInput(
+#                    inputId = "x0",
+#                    label = "$$x_0 \\text{ [Optimum]}$$",
+#                    min = 0.1,
+#                    max = 1.9,
+#                    step = 0.1,
+#                    value = 1,
+#                    width = width_widget
+#                    # width = width_widget
+#                  )
+                 
+                 # Widget_slider : lambda
+                 sliderInput(
+                   inputId = "lambda_n",
+                   label = "$$\\lambda \\text{ [Forme]}$$",
+                   min = 0,
+                   max = 1,
+                   step = 0.1,
+                   value = 1,
+                   width = width_widget
+                   # width = width_widget
+                 )
+                 
+ # FONCTION a()                
+                   # Widget_slider : lambda
+                 sliderInput(
+                   inputId = "sigma_n",
+                   label = "$$\\sigma^2 \\text{ [Intensité compétition]}$$",
+                   min = 0.01,
+                   max = 2,
+                   step = 0.01,
+                   value = .5,
+                   width = width_widget
+                 )
+
+                 br()
+
+# Bouton de reset aux valeurs inititales
+actionButton(inputId = "reset_n", label = "Reset")
+observe({input$reset
+  updateNumericInput(inputId = "sigma_n", value = 0.5)
+  updateNumericInput(inputId = "k0_n", value = 1)
+  updateNumericInput(inputId = "lambda_n", value = 1)
+
+  })
+
+# Bouton Affichage PIP
+actionButton(inputId = "pip", label = "PIP")
+
+# Pour que la valeur max de lambda soit celle de k0
+observe({updateSliderInput(inputId = "lambda_n", max = input$k0)})
+```
+
+## Column {data-width="500"}
+
+### **<font color='blue'>THEORIE</font>** 
+
+$$
+\frac{dn_i}{dt} = rn_i \Bigg[1 - \frac{\sum_{j = 1}^{N}a(x_i, x_j) n_j}{K(x_i )} \Bigg]
+$$
+
+
+## Column {data-width="500"}
+### **<font color='blue'>EVOLUTION DES PHENOTYPES</font>** 
+```{r, cache =F, echo = F}
+
+
+
+
+renderPlot({
+  
+  # CONDITIONS INITITALES
+# --- Matrice M (voir TP)
+M = M_matrix(   # Matrice M
+  N = input$N,
+  xmin = 0,
+  xmax = 2,
+  sigma = input$sigma_n,
+  k0 = input$k0_n,
+  lambda = input$lambda_n
+)
+
+  
+  
+
+
+
+# --- Autres paramètres
+r = 1  # Taux de croissance des populations
+n0 = rep(input$k0_n / input$N, input$N)  # Proportions initiales
+t = seq(0, 1000, 1)  # Temps
+params <- list(r = r, M = M)
+
+  
+# RESOLUTION EDO
+sol <- deSolve::ode(y = n0, times = t, func = LV_trait, parms = params)
+
+  # Paramètre graphique
+par(mar = c(3, 3, 0.4, 0.4),
+    mgp = c(2,  # proximité label et axe
+            1,  # proximité ticks
+            0)
+    )
+  
+plot(
+  x = NULL,
+  y = NULL,
+  type = "l",
+  ylim = c(0, max(sol[,2:input$N]) + max(sol[,2:input$N])*0.1),
+  xlim = c(0, max(t)),
+  xlab = "Temps",
+  ylab = "Proportion",
+  bty = "n"
+)
+
+apply(X = as.data.frame(sol[,2:input$N]), MARGIN = 2, FUN = function(x) lines(x, col = "#292929"))
+})
+
+```
+
+
+### **<font color='blue'>SURVIE</font>** 
+
+
+
+
+
+## Column {data-width="500"}
+
+### **<font color='blue'>SURVIE</font>** 
+
+```{r, cache = F, echo = F}
+
+survivant <- reactiveVal(NULL)
+
+barplot_survie <- renderPlot({
+  
+    # CONDITIONS INITITALES
+# --- Matrice M (voir TP)
+M = M_matrix(   # Matrice M
+  N = input$N,
+  xmin = 0,
+  xmax = 2,
+  sigma = input$sigma_n,
+  k0 = input$k0_n,
+  lambda = input$lambda_n
+)
+
+  
+  
+
+
+
+# --- Autres paramètres
+r = 1  # Taux de croissance des populations
+n0 = rep(input$k0_n / input$N, input$N)  # Proportions initiales
+t = seq(0, 1000, 1)  # Temps
+params <- list(r = r, M = M)
+
+  
+# RESOLUTION EDO
+sol <- deSolve::ode(y = n0, times = t, func = LV_trait, parms = params)
+
+seuil <- 0.01  # Définition du seuil de persistance
+
+# On définit 0 ou 1 la persistance au temps t de chaque phénotype
+sol <- as.data.frame(sol)
+persis <- apply(sol[2:(input$N+1)], MARGIN = 2, FUN = function(x) ifelse(x>=seuil, 1, 0))
+persis <- cbind(sol["time"], persis)
+persis <- tidyr::pivot_longer(persis, cols = 2:(input$N+1), names_to = "Phenotype", values_to = "persis")
+persis <- as.data.frame(persis)
+table(persis)
+persis$Phenotype <- factor(persis$Phenotype, levels = 1:input$N)
+
+# Temps d'exctinction de chaque phénotype
+persis <- tapply(X = persis[, "persis"], INDEX = persis[, "Phenotype"], FUN = sum)
+colors <- ifelse(persis == max(t)+1, "white", "#292929")
+
+# Paramètre graphique
+par(mar = c(2, 3, 0, 0.4),
+    mgp = c(2,  # proximité label et axe
+            1,  # proximité ticks
+            0)
+)
+
+survivant(sum(persis == max(t)+1))
+
+barplot(persis,
+        ylab = "Generation",
+        xlab = NULL,
+        names.arg = NA,
+        col = colors)
+
+})
+
+
+
+```
+
+```{r, echo = F, cache = F}
+n_survivant <- renderText({survivant()})
+```
+
+$N_{survivant} =$ `r n_survivant` 
+
+```{r, echo = F, cache = F}
+barplot_survie
+```
+
+
+### **<font color='blue'>SURVIE</font>** 
 
 
 # # Ressources
