@@ -230,8 +230,9 @@ convergence_text <- renderText({
 $\small{K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2}$
 
 ```{r, echo = F, cache = F}
-
-  x <- seq(0, 2, length.out = 100)
+  xmin <- 0
+  xmax <- 2
+  x <- seq(xmin, xmax, length.out = 100)
 
 
   renderPlot({
@@ -263,8 +264,8 @@ $a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
 
 ```{r, cache = F, echo = F}
 # Définition des valeurs de traits
-    x1 <- seq(0, 2, length.out = 100)
-    x2 <- seq(2, 0, length.out = 100)
+    x1 <- seq(xmin, xmax, length.out = 100)
+    x2 <- seq(xmax, xmin, length.out = 100)
     
     d = x1 - x2
     
@@ -298,8 +299,8 @@ $s(x_i, x_j) = r \Bigg[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \Bigg]$
 
 ```{r, echo = F, cache = F}
 # Traits des 2 phénotypes testés
-x = seq(0.01, 1.99, 0.02)
-y = seq(0.01, 1.99, 0.02)
+x = seq(xmin, xmax, 0.02)
+y = seq(xmin, xmax, 0.02)
 
 
   renderPlot({
@@ -545,8 +546,8 @@ renderPlot({
 # --- Matrice M (voir TP)
 M = M_matrix(   # Matrice M
   N = input$N,
-  xmin = 0,
-  xmax = 2,
+  xmin = xmin,
+  xmax = xmax,
   sigma = input$sigma_n,
   k0 = input$k0_n,
   lambda = input$lambda_n
@@ -560,7 +561,7 @@ M = M_matrix(   # Matrice M
 # --- Autres paramètres
 r = 1  # Taux de croissance des populations
 n0 = rep(input$k0_n / input$N, input$N)  # Proportions initiales
-t = seq(0, 1000, 1)  # Temps
+t = seq(0, 5000, 1)  # Temps
 params <- list(r = r, M = M)
 
   
@@ -611,8 +612,8 @@ barplot_survie <- renderPlot({
 # --- Matrice M (voir TP)
 M = M_matrix(   # Matrice M
   N = input$N,
-  xmin = 0,
-  xmax = 2,
+  xmin = xmin,
+  xmax = xmax,
   sigma = input$sigma_n,
   k0 = input$k0_n,
   lambda = input$lambda_n
@@ -660,12 +661,11 @@ survivant(sum(persis == max(t)+1))
 barplot(persis,
         ylab = "Generation",
         xlab = NULL,
+        ylim = c(0, max(t)+1),
         names.arg = NA,
         col = colors)
 
 })
-
-
 
 ```
 

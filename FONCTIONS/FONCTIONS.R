@@ -157,6 +157,10 @@ LV_trait <- function(t, n, params){
   r <- params[[1]]
   M <- params[[2]]
   
+  # Fixe à 0 les N trop petits
+  epsilon = 10^(-8)
+  n[n<epsilon] <- 0
+  
   # Sortie
   dn <-  r * n * (1 - n %*% M)
   
