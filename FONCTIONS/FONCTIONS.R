@@ -104,7 +104,9 @@ filled.contour.modif <-
     invisible()
   }
 
-# MATRICE M
+
+
+# MATRICE M ---------------------------------------------------------------
 M_matrix <- function(N = N, xmin = xmin, xmax = xmax, sigma = sigma, k0 = k0, lambda = lambda){
   # DESCRIPTION 
   #' @param N le nombre de phénotypes en compétition
@@ -145,6 +147,9 @@ M_matrix <- function(N = N, xmin = xmin, xmax = xmax, sigma = sigma, k0 = k0, la
   return(M)
 }
 
+
+
+# FONCTION DE COMPETITION -------------------------------------------------
 LV_trait <- function(t, n, params){
   # DESCRIPTION
   #' @param t le temps
@@ -166,3 +171,78 @@ LV_trait <- function(t, n, params){
   
   return(list(dn))
 }
+
+
+
+
+
+
+# ARBRE -------------------------------------------------------------------
+sortie_raster <-
+  function(nT = nT, caption = caption) {
+    # DESCRIPTION
+    #' @param nT objet contenant la sortie de la fonction de mutation_function()
+    #' @param caption titre de la caption du graphique
+    
+    
+    
+    # PREPARATION DES DONNES POUR LA VISUALISATION
+    # On supprime les colonnes vides
+    nT_gg <- as.data.frame(nT)
+    col_0 <- which(colSums(nT_gg) == 0)
+    if (length(col_0) != 0) {
+      nT_gg <- nT_gg[-col_0]
+    }
+    
+    # On convertit en proportion par scénario pour une meilleure lisibilité
+    nT_gg <-
+      as.data.frame(t(apply(
+        nT_gg,
+        MARGIN = 1,
+        FUN = function(x)
+          x / sum(x)
+      )))
+    
+    # On renomme les colonnes
+    col_nb <- ifelse(ncol(nT_gg) == 0, N, ncol(nT_gg))
+    colnames(nT_gg) <- 1:col_nb
+    
+    # Ajout colonne "temps"
+    nT_gg$temps <- 1:evol_time
+    
+    # On ajuste le format pour ggplot2
+    nT_gg <-  nT_gg %>%
+      pivot_longer(cols = 1:col_nb,
+                   values_to = "dens",
+                   names_to = "phenotype")
+    
+    # On binarise pour la représentation
+    nT_gg$dens <- ifelse(nT_gg$dens > seuil, 1, 0)
+    
+    # Ajout colonne trait associé au phénotype
+    nT_gg$trait <- rep(X[1:col_nb], evol_time)
+    
+    
+    
+    # RASTER PLOT
+    ggplot(data = nT_gg, mapping = aes(trait, temps,  z = dens)) +
+      geom_contour(color = "black") +
+      scale_fill_gradient2(low = "white" ,
+                           high = "black") +
+      theme_classic() +
+      geom_vline(xintercept = x0,
+                 col = "red",
+                 lty = 2) +
+      labs(caption = caption) +
+      theme(
+        line = element_blank(),
+        plot.caption = element_text(hjust = 0.5, size = 14),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "none",
+        text = element_text(size = 15)
+      ) +
+      xlim(c(0, 2)) +
+      xlab("Valeur du trait") +
+      ylab("Temps évolutif")
+  }

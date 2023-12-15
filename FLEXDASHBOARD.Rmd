@@ -1,5 +1,5 @@
 ---
-title: "UE FACE (Pierre-Alexandre QUITTET)"
+title: "UE FACE (PA QUITTET)"
 author: ""
 date: ""
 output:
@@ -14,10 +14,12 @@ knitr::opts_chunk$set(echo = TRUE, cache = F, echo = F)
 ```
 
 ```{r, echo = F}
+# Script contenant l'ensemble des fonctions nécessaires
 source("FONCTIONS/FONCTIONS.R")
 ```
 
 ```{r, echo = F, eval = F}
+# Packages
 library(flexdashboard)
 library(shiny)
 library(tidyverse)
@@ -26,11 +28,20 @@ library(numDeriv)
 library(deSolve)
 ```
 
-# # Introduction à la dynamique évolutive
+<style>
+body {
+text-align: justify}
+</style>
+
+
+
+# **A propos**
 
 ## Column {data-width="500"}
 
-### INTRODUCTION
+### **<font color='blue'>PRESENTATION</font>** 
+Lien GitHub : <https://github.com/paquittet/SHINY> 
+
 
 La dynamique adaptative est un cadre théorique permettant de modéliser l'évolution phénotypique. Elle permet de comprendre les conséquences à long-terme de petites mutations phénotypique sur la trajectoire évolutive des traits considérés. Ce cadre de recherche associe les méthodes de dynamique de population et les concepts de sélection fréquence-dépendance issue de la théorie des jeux (Maynard-Smith, 1973). La sélection fréquence-dépendance s'inscrit dans le paradigme de paysage adaptatif de fitness dynamique, où la fréquence des phénotypes dans la population influence la fitness de ces phénotypes.\
 La paradigme de modélisation classique utilisée consiste à considérer une population résidente et une population de mutant à faible densité dont le phénotype diffère légèrement de la population résidente.
@@ -45,7 +56,7 @@ Ici les populations sont considérées **monomorphiques** : tous les individus d
 
 \
 
-# # Compétition à deux phénotypes
+# **Compétition à deux phénotypes**
 
 ## Column {.sidebar data-width="200"}
 
@@ -105,7 +116,7 @@ width_widget = 200 # taille des widgets
                  br()
 
 # Bouton de reset aux valeurs inititales
-actionButton(inputId = "reset", label = "Reset")
+actionButton(inputId = "reset", label = "Reset", class = "btn-danger")
 observe({input$reset
   updateNumericInput(inputId = "sigma", value = 0.5)
   updateNumericInput(inputId = "k0", value = 1)
@@ -114,7 +125,7 @@ observe({input$reset
   })
 
 # Bouton Affichage PIP
-actionButton(inputId = "pip", label = "PIP")
+actionButton(inputId = "pip", label = "PIP", class = "btn-primary btn")
 
 # Pour que la valeur max de lambda soit celle de k0
 observe({updateSliderInput(inputId = "lambda", max = input$k0)})
@@ -144,6 +155,78 @@ $$
 
 Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x_i$ ($x_j$) le phénotype de l'espère $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r = 1$ est identique pour les deux phénotypes. Les phénotypes sont en compétition car elles exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x_i, x_j)$.  
 
+
+
+## Column {data-width="500"}
+
+### **<font color='blue'>FONCTION DE RESSOURCES K(x)</font>** 
+
+$K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2$
+
+```{r, echo = F, cache = F}
+  xmin <- 0
+  xmax <- 2
+  x <- seq(xmin, xmax, length.out = 100)
+
+
+  renderPlot({
+
+  par(mar = c(6, 4, .5, 2), mgp = c(2.2, 1, .5))
+  plot(
+    x = x,
+    y = k_f(x = x, k0 = input$k0, x0 = 1, lambda = input$lambda),
+    lwd = 2,
+    col = "#7eb606",
+    ylim = c(0, input$k0),
+    xlim = c(0, 2),
+    type = "l",
+    xlab = latex2exp::TeX("x"),
+    ylab = latex2exp::TeX("K(x)"),
+    cex.lab = 1.2,
+    bty = "n"  # Supprime le cadre autour du plot
+  )
+})
+
+    
+```
+
+
+### **<font color='blue'>FONCTION DE COMPETITION a(x, y)</font>** 
+
+$\large a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
+
+```{r, cache = F, echo = F}
+# Définition des valeurs de traits
+    x1 <- seq(xmin, xmax, length.out = 100)
+    x2 <- seq(xmax, xmin, length.out = 100)
+    
+    d = x1 - x2
+    
+    
+   
+    renderPlot({
+      # Aspect ratio = square
+  par(mar = c(6, 4, .5, 2), mgp = c(2.2, 1, .5))
+      
+   plot(
+      a_f(x1 = x1, x2 = x2, sigma = input$sigma) ~ d, 
+      lwd = 2,
+      col = "#CD3333",
+      ylim = c(0, 1),
+      xlim = c(-2, 2),
+      type = "l",
+      xlab = latex2exp::TeX("$x_i - x_j$"),
+      ylab = latex2exp::TeX("$a(x_i - x_j)$"),
+      cex.lab = 1.2,
+      bty = "n"
+    )
+})
+```
+
+
+## Column {data-width="500" .tabset}
+
+### **<font color='blue'>PIP</font>** 
 ```{r, echo = F, cache = F}
 # Calcul équilibre
 # Reformatage de la fonction fitness
@@ -206,116 +289,37 @@ convergence_text <- renderText({
   # ESS
   convergence <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2] + numDeriv::hessian(func = fitness_f, x = c(1, 1))[1,2]
   if(convergence <= 0){
+    
+    # TEXT
     value_convergence <- "Stable"
+
   } else {
+    # TEXT
     value_convergence <- "Instable"
   }
 
   return(value_convergence)
 })
 
+
+
 ```
 
-**Stabilité évolutive et convergence du point $x_0$ **  
+$s(x_i, x_j) = r \big[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \big]$
 
-- **Stabilité évolutive** : `r ess_text` 
-- **Convergence évolutive** : `r convergence_text` 
-
-
-
-## Column {data-width="500"}
-
-### **<font color='blue'>FONCTION DE RESSOURCES K(x)</font>** 
-
-$\small{K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2}$
-
-```{r, echo = F, cache = F}
-  xmin <- 0
-  xmax <- 2
-  x <- seq(xmin, xmax, length.out = 100)
+o **Stabilité évolutive** (`r ess_text`) :   
+$\large \frac{\partial^2_s(x_i, x_j)}{\partial_{x_j^2}}\Big|_{x_j=x_i=x_0}$ `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`  
 
 
-  renderPlot({
-  par(pty = "s")
-
-  par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
-  plot(
-    x = x,
-    y = k_f(x = x, k0 = input$k0, x0 = 1, lambda = input$lambda),
-    lwd = 2,
-    col = "#7eb606",
-    ylim = c(0, input$k0),
-    xlim = c(0, 2),
-    type = "l",
-    xlab = latex2exp::TeX("x"),
-    ylab = latex2exp::TeX("K(x)"),
-    cex.lab = 1.2,
-    bty = "n"  # Supprime le cadre autour du plot
-  )
-})
-
-    
-```
+o **Convergence évolutive** (`r convergence_text`) :  
+$\large \frac{\partial^2_s(x_i, x_j)}{\partial_{x_i} \partial_{x_j}} + \frac{\partial^2_s(x_i, x_j)}{\partial_{x_j^2}}\Big|_{x_j=x_i=x_0}$ `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`
 
 
-### **<font color='blue'>FONCTION DE COMPETITION a(x, y)</font>** 
-
-$a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
-
-```{r, cache = F, echo = F}
-# Définition des valeurs de traits
-    x1 <- seq(xmin, xmax, length.out = 100)
-    x2 <- seq(xmax, xmin, length.out = 100)
-    
-    d = x1 - x2
-    
-    # Aspect ratio = square
-    par(pty = "s")
-   
-    renderPlot({
-  # par(pty = "s")
-  par(mar = c(6, 4, .5, 2), mgp = c(2.5, 1, .5))
-      
-   plot(
-      a_f(x1 = x1, x2 = x2, sigma = input$sigma) ~ d, 
-      lwd = 2,
-      col = "#CD3333",
-      ylim = c(0, 1),
-      xlim = c(min(d), max(d)),
-      type = "l",
-      xlab = latex2exp::TeX("$x_i - x_j$"),
-      ylab = latex2exp::TeX("$a(x_i - x_j)$"),
-      cex.lab = 1.2,
-      bty = "n"
-    )
-})
-```
 
 
-## Column {data-width="500" .tabs}
-
-### **<font color='blue'>PAIRWISE INVASIBILITY PLOT</font>** 
-$s(x_i, x_j) = r \Bigg[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \Bigg]$
-
-```{r, echo = F, cache = F}
-# Traits des 2 phénotypes testés
-x = seq(xmin, xmax, 0.02)
-y = seq(xmin, xmax, 0.02)
-
-
-  renderPlot({
-  if(input$pip %% 2 == 1) { # Activation ou non des PIP
-  
-  par(pty = "s")
-  par(mfrow = c(3, 1))
-  # Paramètre graphique
-  par(
-    mar = c(8, 4, 0, 2), # marges intérieures
-    oma = c(0, 0, 0, 0), # marges extérieures
-    mgp = c(2.5,  # proximité label et axe
-            1,  # proximité ticks
-            0)  # proximité axes
-    )
+```{r}
+  renderPlot(outputArgs = list(width = dev.size("px")[1], height = dev.size("px")[2]),{
+  if(input$pip %% 2 != 1) { # Activation ou non des PIP
   
 
 # On modifie la valeur par défaut de Sigma
@@ -347,10 +351,8 @@ z <- apply(z, MARGIN = 2, FUN = function(x) ifelse(x<=0, 0, 1))
 
 
 # Fonction filled.contour modifiée pour contrôle graphique (voir chunk caché [echo = F] du dessus pour détails)
-par(cex.lab = 1.2, cex.axis = 1.2)  # On change la taille par défaut des axes
 
  # Aspect ratio = square
-    par(pty = "s")
      
 # Graphique simple
 mutant_plot <- function(xlab = "Résident", ylab = "Mutant")
@@ -366,13 +368,98 @@ mutant_plot <- function(xlab = "Résident", ylab = "Mutant")
                     ylim = c(0, 2),
                     nlevels = 2,
                     las = 1,
-                    cex.lab = 1.8,
+                    key.axes = F
+)
+points(x = 1, y = 1, col = "red")
+}
+
+
+ # Paramètre graphique
+  par(
+    pty = "s",
+    cex.axis = 1.2,  # taille des ticks labels
+    cex.lab = 1.5,
+    mar = c(12, 5, 0, 3), # marges intérieures (bas, gauche, haut, droite)
+    oma = c(8, 0, 2, 0), # marges extérieures
+    mgp = c(2.3,  # proximité label et axe
+            1,  # proximité ticks
+            0)  # proximité axes
+    )
+
+
+# Display plot
+mutant_plot()
+}
+  })
+```
+
+
+
+
+### **<font color='blue'>COEXISTENCE</font>** 
+$\small s(x_i, x_j) = r \big[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \big]$
+
+```{r, echo = F, cache = F}
+# Traits des 2 phénotypes testés
+x = seq(xmin, xmax, 0.02)
+y = seq(xmin, xmax, 0.02)
+
+
+  renderPlot(outputArgs = list(width = dev.size("px")[1], height = dev.size("px")[2]),{
+  if(input$pip %% 2 != 1) { # Activation ou non des PIP
+  
+
+# On modifie la valeur par défaut de Sigma
+a_f <- function(x1, x2) {
+  a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
+  return(a)
+}
+
+k_f <- function(x) {
+  x0 = 1
+  k <- input$k0 - input$lambda*(x - x0)^2
+  
+  return(k)
+  
+}
+
+fitness_f <- function(x1, x2){
+  r = 1
+  s <- r*(1 - (a_f(x1, x2) * (k_f(x1) / k_f(x2))))
+  return(s)
+}
+
+# outer() créer une matrice croisé x~y avec les résultats de la fonction fitness_f() pour toutes les combinaisons de x / y
+z <- outer(x, y, fitness_f)  
+
+# On binarise avec 0 pour s(x, y) < 0 et 1 pour s(x, y) > 0
+z <- apply(z, MARGIN = 2, FUN = function(x) ifelse(x<=0, 0, 1))
+
+
+
+# Fonction filled.contour modifiée pour contrôle graphique (voir chunk caché [echo = F] du dessus pour détails)
+
+ # Aspect ratio = square
+     
+# Graphique simple
+mutant_plot <- function(xlab = "Résident", ylab = "Mutant")
+{
+    filled.contour.modif(
+                    x = x,
+                    y = y,
+                    z = z,
+                    col = c("white", "#a6cde9"),
+                    xlab = xlab,
+                    ylab = ylab,
+                    xlim = c(0, 2),
+                    ylim = c(0, 2),
+                    nlevels = 2,
+                    las = 1,
                     key.axes = F
 )
 
 }
 
-mutant_plot()
 
 # On inverse les valeurs des axes
 z_rev <- apply(z, MARGIN = 1, FUN = rev)
@@ -390,19 +477,12 @@ resident_plot <- function(xlab = "Mutant", ylab = "Résident")
                     ylim = c(0, 2),
                     nlevels = 2,
                     las = 1,
-                    cex.lab = 1.8,
                     key.axes = F
 )
 }
 
-resident_plot()
 
-# SUPERPOSITION
-# Graphique s(x, y)
-mutant_plot(xlab = NULL, ylab = NULL)
-par(new = TRUE)  # permet la superposition des graphiques
-resident_plot(xlab = NULL, ylab = NULL)
-par(new = TRUE)  # permet la superposition des graphiques
+# COEXISTENCE
 
 # On extrait les lignes où les deux valeurs de s(x, y) sont positives
 coex_row <- which(z == 1 & z_rev == 1)
@@ -411,22 +491,49 @@ z_coex[-coex_row] <- 0
 
 
 # Graphique s(x, y) & s(y, x) > 0
-filled.contour.modif(
-                    x = x,
-                    y = y,
-                    z = z_coex,
-                    col = c(rgb(0, 0, 0, alpha = 0), adjustcolor("#7eb606", alpha.f = 1)),
-                    xlab = NULL,
-                    ylab = "Coexistence",
-                    xlim = c(0, 2),
-                    ylim = c(0, 2),
-                    nlevels = 2,
-                    las = 1,
-                    cex.lab = 1.8,
-                    key.axes = F
-)
+coex_plot <- function(xlab = NULL, ylab = NULL) {
+  filled.contour.modif(
+    x = x,
+    y = y,
+    z = z_coex,
+    col = c(rgb(0, 0, 0, alpha = 0), adjustcolor("#7eb606", alpha.f = 1)),
+    xlab = NULL,
+    ylab = "Coexistence",
+    xlim = c(0, 2),
+    ylim = c(0, 2),
+    nlevels = 2,
+    las = 1,
+    key.axes = F
+  )
+}
+
+
+ # Paramètre graphique
+  par(
+    pty = "s",
+    mfrow = c(3, 1),
+    cex.axis = 1.3,  # taille des ticks labels
+    cex.lab = 1.8,
+    mar = c(3.5, 7, 1, 7), # marges intérieures (bas, gauche, haut, droite)
+    oma = c(2, 0, 0, 0), # marges extérieures
+    mgp = c(2.3,  # proximité label et axe
+            1,  # proximité ticks
+            0)  # proximité axes
+    )
+
+
+# Display plot
+mutant_plot()
+resident_plot()
+
+mutant_plot(xlab = NULL, ylab = NULL)
+par(new = TRUE)  # permet la superposition des graphiques
+resident_plot(xlab = NULL, ylab = NULL)
+par(new = TRUE)  # permet la superposition des graphiques
+coex_plot(xlab = NULL, ylab = NULL)
 }
   })
+  
   
 ```
 
@@ -446,8 +553,7 @@ filled.contour.modif(
 
 
 
-
-# # Compéttion à n phénotypes
+# **Compétition à n phénotypes**
 
 ## Column {.sidebar data-width="200"}
 ```{r, echo = F}
@@ -456,7 +562,7 @@ width_widget = 200 # taille des widgets
 
 
 # NOMBRE DE PHENOTYPES
-                numericInput(inputId = "N", label = "Nombre de phénotypes", value = 2, min = 2, max = 50)
+                numericInput(inputId = "N", label = "Nombre de phénotypes", value = 5, min = 2, max = 50)
 #  FONCTION K 
                  # Widget_slider : K_0
                  sliderInput(
@@ -509,20 +615,22 @@ width_widget = 200 # taille des widgets
                  br()
 
 # Bouton de reset aux valeurs inititales
-actionButton(inputId = "reset_n", label = "Reset")
-observe({input$reset
+actionButton(inputId = "reset_n", label = "Reset", class = "btn-danger")
+
+observe({input$reset_n
   updateNumericInput(inputId = "sigma_n", value = 0.5)
   updateNumericInput(inputId = "k0_n", value = 1)
   updateNumericInput(inputId = "lambda_n", value = 1)
+  updateNumericInput(inputId = "N", value = 5)
 
   })
 
-# Bouton Affichage PIP
-actionButton(inputId = "pip", label = "PIP")
 
 # Pour que la valeur max de lambda soit celle de k0
 observe({updateSliderInput(inputId = "lambda_n", max = input$k0)})
 ```
+
+
 
 ## Column {data-width="500"}
 
@@ -533,7 +641,8 @@ $$
 $$
 
 
-## Column {data-width="500"}
+
+## Column {data-width="400"}
 ### **<font color='blue'>EVOLUTION DES PHENOTYPES</font>** 
 ```{r, cache =F, echo = F}
 
@@ -569,7 +678,7 @@ params <- list(r = r, M = M)
 sol <- deSolve::ode(y = n0, times = t, func = LV_trait, parms = params)
 
   # Paramètre graphique
-par(mar = c(3, 3, 0.4, 0.4),
+par(mar = c(3, 3, 0.4, 2),
     mgp = c(2,  # proximité label et axe
             1,  # proximité ticks
             0)
@@ -592,13 +701,6 @@ apply(X = as.data.frame(sol[,2:input$N]), MARGIN = 2, FUN = function(x) lines(x,
 ```
 
 
-### **<font color='blue'>SURVIE</font>** 
-
-
-
-
-
-## Column {data-width="500"}
 
 ### **<font color='blue'>SURVIE</font>** 
 
@@ -650,7 +752,7 @@ persis <- tapply(X = persis[, "persis"], INDEX = persis[, "Phenotype"], FUN = su
 colors <- ifelse(persis == max(t)+1, "white", "#292929")
 
 # Paramètre graphique
-par(mar = c(2, 3, 0, 0.4),
+par(mar = c(4, 3, 1, 2),
     mgp = c(2,  # proximité label et axe
             1,  # proximité ticks
             0)
@@ -673,26 +775,25 @@ barplot(persis,
 n_survivant <- renderText({survivant()})
 ```
 
-$N_{survivant} =$ `r n_survivant` 
+$N_{survivant} =$ `r n_survivant`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`r paste0("\u25A1  [survie] \u25A0 [extinction]")`
 
 ```{r, echo = F, cache = F}
 barplot_survie
 ```
 
 
-### **<font color='blue'>SURVIE</font>** 
 
 
-# # Ressources
+# **Ressources**
 
 ## Column {data-width="500"}
 
 ### **DOCUMENTATION**
 
+Lien GitHub de l'auteur : <https://github.com/paquittet/SHINY>
+
 Tutoriel shiny : <https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html>
 
 Tutoriel flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>
-
-Lien GitHub de l'auteur : <https://github.com/paquittet/SHINY>
 
 Série de vidéos d'introduction : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
