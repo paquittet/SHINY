@@ -39,22 +39,21 @@ text-align: justify}
 
 ## Column {data-width="500"}
 
-### **<font color='blue'>PRESENTATION</font>** 
+### **<font color='black'>PRESENTATION</font>** 
 Lien GitHub : <https://github.com/paquittet/SHINY> 
 
+Cette application a été réalisé dans le cadre de l'UE "Interface" dans le cadre du master MODE ('modélisation en écologie) de l'Université de Rennes. Cette application a été crée tout particulièrement pour les futurs étudiants de 2nd année du dit master MODE pour l'UE MDET (modèle déterministe) dans laquelle la dynamique évolutive est enseignée. L'objectif de ce travail est de développé une certaine sensibilité aux paramètres influençant la compétition entre phénotypes dans un paradigme de dynamique évolutive. Elle est constituée de deux pages pédagogiques : <Compétition à deux phénotypes> et <Compétition à n phénotypes> organisées autour d'un rappel sur la théorie mobilisée et des figures dont les paramètres sont manipulables pour explorer le rôle de chaque paramètre dans les équations sur lesquelles se fondent la modélisation de cette discipline. Une troisième page <Ressources> contient les documents ayant permis le développement de cette application Shiny ainsi que des ressources de dynamique évolutive.
+
+### **<font color='black'>DYNAMIQUE EVOLUTIVE</font>** 
 
 La dynamique adaptative est un cadre théorique permettant de modéliser l'évolution phénotypique. Elle permet de comprendre les conséquences à long-terme de petites mutations phénotypique sur la trajectoire évolutive des traits considérés. Ce cadre de recherche associe les méthodes de dynamique de population et les concepts de sélection fréquence-dépendance issue de la théorie des jeux (Maynard-Smith, 1973). La sélection fréquence-dépendance s'inscrit dans le paradigme de paysage adaptatif de fitness dynamique, où la fréquence des phénotypes dans la population influence la fitness de ces phénotypes.\
 La paradigme de modélisation classique utilisée consiste à considérer une population résidente et une population de mutant à faible densité dont le phénotype diffère légèrement de la population résidente.
 
 L'étude de la dynamique adaptative de phénotypes reposent sur deux idées fondamentales (Brännström et al., 2013) :\
 $\quad$ **(1)** la population résidente est supposée être en équilibre dynamique lorsque de nouveaux mutants apparaissent\
-$\quad$ **(2)** l'avenir de ces mutants peut être déduit de leur taux de croissance initial lorsqu'ils sont rares dans la population résidente
+$\quad$ **(2)** l'avenir de ces mutants peut être déduit de leur taux de croissance initial lorsqu'ils sont rares dans la population résidente  
 
-\
-
-Ici les populations sont considérées **monomorphiques** : tous les individus d'un même phénotype donnée partagent la même valeur de trait. On considérera également une **reproduction clonale** (les individus donneront naissance à des individus de même trait).
-
-\
+Plusieurs simplifications générales sont à considérées dans ce travail : (i) les phénotypes considérées ici ne varient que sur la gamme 0 et 2, (ii) le phénotype "optimal" est fixé à 1 et (iii) les nouveaux phénotypes en compétition se répartissent de façon symétrique et régulière autour de cette valeur optimale.
 
 # **Compétition à deux phénotypes**
 
@@ -135,31 +134,69 @@ observe({updateSliderInput(inputId = "lambda", max = input$k0)})
 #             choices = c("Non", "Oui"), selected = "Non")
 ```
 
-## Column {data-width="600"}
+## Column {data-width="600" .tabset}
 
-### **<font color='blue'>THEORIE</font>**
-
-On cherche à modéliser la compétition entre 2 traits phénotypiques $x_i$ et $x_j$ en compétition. On utilise l'équation de compétition de Lotka-Volterra :
-
-\
+### **<font color='black'>Modèle</font>**
+$\color{blue}{\text{Présentation du modèle}}$  
+On cherche à modéliser la compétition entre 2 traits phénotypiques d'un résident $x$ et d'un mutant $y$ en compétition. On utilise l'équation de compétition de Lotka-Volterra :
 
 $$
 \large{
 \begin{cases}
-\frac{dn_i}{dt} = rn_i \Big[1 - \frac{\sum_{j = 1}^{2}a(x_i, x_j) n_j}{K(x_i )} \Big]\\
+\frac{dn_i}{dt} = rn_i \Big[1 - \frac{\sum_{j = 1}^{2}a(x, y) n_j}{K(x )} \Big]\\
 \\
-\frac{dn_j}{dt} = rn_j \Big[1 - \frac{\sum_{i = 1}^{2}a(x_j, x_i) n_i}{K(x_j )} \Big]
+\frac{dn_j}{dt} = rn_j \Big[1 - \frac{\sum_{i = 1}^{2}a(y, x) n_i}{K(y )} \Big]
 \end{cases}
 }
 $$
 
-Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x_i$ ($x_j$) le phénotype de l'espère $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r = 1$ est identique pour les deux phénotypes. Les phénotypes sont en compétition car elles exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x_i, x_j)$.  
+Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x$ ($y$) le phénotype de $i$ ($j$). On considère ici que le taux de croissance intrinsèque $r = 1$ est fixé et identique pour les deux phénotypes. Les phénotypes sont en compétition car ils exploitent la même ressource dont l'efficacité d'exploitation est définie par la fonction $K(x)$. L'intensité de la compétition quant à elle est définie par la fonction $a(x, y)$. L'intensité de compétition est modulé par la distance entre les valeurs phénotypiques $x, y$ (plus cet écart est petit, plus la compétition est importante).     
+
+### **<font color='black'>Fitness d'invasion</font>**  
+$\color{blue}{\text{Fitness d'invasion et gradient de sélection}}$  
+La **fitness d'invasion** $s(x, y)$  est définie comme le taux de croissance attendu d’un mutant $y$ initialement rare dans l’environnement défini par le résident $x$. La dérivée de cette fitness représente le **gradient de sélection** $D(x)$ aux alentours du point $x \approx y$ :
+
+$$
+(s(x, y))' = D(x) = \frac{\partial{s}(x, y)}{\partial{yx_j}}\Big|_{x=y}
+$$
+
+Le signe du gradient détermine la sélection du trait (si il est positif alors le trait est sélectionné, s'il est négatif, il est contre-sélectionné) et donc la direction du changement évolutif.    
+
+\
+
+$\color{blue}{\text{Stratégies singulières évolutives}}$  
+Ces stratégies représentent les valeurs de phénotypes pour lesquelles $D(x) = 0$. On peut les classer par deux types de stabilités : stabilité évolutive et stabilité de convergence. On parlera de **stratégie évolutivement stable** lorsque le point est représente un maximum de fitness qui une fois atteint ne pourra plus être envahi par des mutants proches tel que : 
+$$
+\frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=x*} <0
+$$
+La stratégie est instable lorsque $> 0$.   
+
+\
+
+On parlera de **stratégie stable par convergence** lorsque le point singulier peut-être atteint par invasions successives de mutants soit :
+
+$$
+\frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=x*} <0 
+$$
+
+et instable lorsque $> 0$. 
+
+### **<font color='black'>Hypothèses</font>**
+
+$\color{blue}{\text{Hypothèses biologiques}}$  
+
+- Populations monomorphiques 
+- Reproduction clonale
+- Les différents phénotypes ont le même taux de croissance intrinsèque $r$
+- Population résidente à l'équilibre
+- Croissance dans la population comme proxy de la fitness
+- Compétition sur une unique ressource
 
 
 
 ## Column {data-width="500"}
 
-### **<font color='blue'>FONCTION DE RESSOURCES K(x)</font>** 
+### **<font color='black'>Fonction de ressources</font>** 
 
 $K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2$
 
@@ -191,9 +228,9 @@ $K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2$
 ```
 
 
-### **<font color='blue'>FONCTION DE COMPETITION a(x, y)</font>** 
+### **<font color='black'>Fonction de compétition</font>** 
 
-$\large a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
+$\large a(x, y) = e^{-\frac{1}{2}(x - y)^2/ \color{blue}{  \sigma ^2} }$
 
 ```{r, cache = F, echo = F}
 # Définition des valeurs de traits
@@ -215,8 +252,8 @@ $\large a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
       ylim = c(0, 1),
       xlim = c(-2, 2),
       type = "l",
-      xlab = latex2exp::TeX("$x_i - x_j$"),
-      ylab = latex2exp::TeX("$a(x_i - x_j)$"),
+      xlab = latex2exp::TeX("$x - y$"),
+      ylab = latex2exp::TeX("$a(x - y)$"),
       cex.lab = 1.2,
       bty = "n"
     )
@@ -226,7 +263,7 @@ $\large a(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2/ \color{blue}{  \sigma ^2} }$
 
 ## Column {data-width="500" .tabset}
 
-### **<font color='blue'>PIP</font>** 
+### **<font color='black'>PIP</font>** 
 ```{r, echo = F, cache = F}
 # Calcul équilibre
 # Reformatage de la fonction fitness
@@ -305,14 +342,14 @@ convergence_text <- renderText({
 
 ```
 
-$s(x_i, x_j) = r \big[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \big]$
+$s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$
 
 o **Stabilité évolutive** (`r ess_text`) :   
-$\large \frac{\partial^2_s(x_i, x_j)}{\partial_{x_j^2}}\Big|_{x_j=x_i=x_0}$ `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`  
+$\large \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x= \color{red}{x_0}}$ `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`  
 
 
 o **Convergence évolutive** (`r convergence_text`) :  
-$\large \frac{\partial^2_s(x_i, x_j)}{\partial_{x_i} \partial_{x_j}} + \frac{\partial^2_s(x_i, x_j)}{\partial_{x_j^2}}\Big|_{x_j=x_i=x_0}$ `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`
+$\large \frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=\color{red}{x_0}}$ `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`
 
 
 
@@ -396,8 +433,8 @@ mutant_plot()
 
 
 
-### **<font color='blue'>COEXISTENCE</font>** 
-$\small s(x_i, x_j) = r \big[ 1 - a(x_i, x_j) \frac{K(x_i)}{K(x_j)} \big]$
+### **<font color='black'>Coexistence</font>** 
+$\small s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$
 
 ```{r, echo = F, cache = F}
 # Traits des 2 phénotypes testés
@@ -538,9 +575,14 @@ coex_plot(xlab = NULL, ylab = NULL)
 ```
 
 
+### **<font color='black'>Interprétation</font>**
+$\color{blue}{\text{Interprétation des PIP}}$   
+La fitness d'invasion représente le paysage de fitness tel qu'il est vécut par un mutant rare. Dans une grande population, seuls les mutants ayant des valeurs de trait $y$ pour lesquels $s(x, y) > 0$ peuvent envahir avec succès. En général, le résultat d'une invasion implique le remplacement du résident par le mutant, ce qui va change le paysage de fitness invasion après invasion. Pour déterminer l'issue de la série d'invasions, on peut utiliser des *pairwise invasibility plot* (PIP). Ces schémas montrent pour chaque valeur de traits du résident $x$ pour lesquels la fitness $s(x, y)$ d'un mutant de trait $y$ est positive (couleur pleine) ou négative (en blanc).  Dans les PIP, les paysages de fitness d'un mutant rare correspondent aux lignes verticales où la valeur du caractère du résident est constante.
 
+\
 
-
+$\color{blue}{\text{Coexistence}}$   
+Ces PIP proposent également une méthode graphique pour déterminer les zones de coexistence où $s(x, y) > 0$ et $s(y, x) > 0$ caractérisées par la superposition des PIP mutant / résident et résident / mutant. 
 
 
 
@@ -634,16 +676,16 @@ observe({updateSliderInput(inputId = "lambda_n", max = input$k0)})
 
 ## Column {data-width="500"}
 
-### **<font color='blue'>THEORIE</font>** 
+### **<font color='black'>Théorie</font>** 
 
 $$
-\frac{dn_i}{dt} = rn_i \Bigg[1 - \frac{\sum_{j = 1}^{N}a(x_i, x_j) n_j}{K(x_i )} \Bigg]
+\frac{dn_i}{dt} = rn_i \Bigg[1 - \frac{\sum_{j = 1}^{N}a(x, y) n_j}{K(x )} \Bigg]
 $$
 
 
 
 ## Column {data-width="400"}
-### **<font color='blue'>EVOLUTION DES PHENOTYPES</font>** 
+### **<font color='black'>Evolution des phénotypes</font>** 
 ```{r, cache =F, echo = F}
 
 
@@ -702,7 +744,7 @@ apply(X = as.data.frame(sol[,2:input$N]), MARGIN = 2, FUN = function(x) lines(x,
 
 
 
-### **<font color='blue'>SURVIE</font>** 
+### **<font color='black'>Survie</font>** 
 
 ```{r, cache = F, echo = F}
 
@@ -788,12 +830,26 @@ barplot_survie
 
 ## Column {data-width="500"}
 
-### **DOCUMENTATION**
+### **Documentation**
 
-Lien GitHub de l'auteur : <https://github.com/paquittet/SHINY>
+GitHub du projet : <https://github.com/paquittet/SHINY>  
+
+\
+
+$\color{blue}{\text{Dynamique évolutive}}$  
+
+Cours complet de Frédéric Hamelin (avec permission) : <https://github.com/paquittet/SHINY>
+
+Vidéo youtube : <https://www.youtube.com/watch?v=x3FnsyCq_0I>  
+
+Deux documents pdf d'introduction de O. Dieckmann (2004, 2015) très complets : <https://github.com/paquittet/SHINY>
+
+\
+
+$\color{blue}{\text{Shiny / Flexdashboard}}$  
 
 Tutoriel shiny : <https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html>
 
 Tutoriel flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>
 
-Série de vidéos d'introduction : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
+Série de vidéos d'introduction à flexdashboard : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
