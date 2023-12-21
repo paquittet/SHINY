@@ -364,14 +364,14 @@ convergence_text <- renderText({
 
 ```
 
-$\color{blue}{\text{Fitness d'invasion}}$  
-$$\small s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$$
+$\color{blue}{\text{Fitness d'invasion}}$
+$$s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$$
 
 $\color{blue}{\text{Stabilité évolutive}}$ (`r ess_text` `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`) :   
-$$\small \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x= \color{red}{x_0}}$$ 
+$$\frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x= \color{red}{x_0}}$$ 
 
 $\color{blue}{\text{Stabilité de convergence}}$ (`r convergence_text` `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`)      
-$$\small \frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=\color{red}{x_0}}$$ 
+$$\frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=\color{red}{x_0}}$$ 
 
 
 
@@ -439,8 +439,8 @@ points(x = 1, y = 1, col = "red")
     pty = "s",
     cex.axis = 1,  # taille des ticks labels
     cex.lab = 1.2,
-    mar = c(12, 7, 0, 5), # marges intérieures (bas, gauche, haut, droite)
-    oma = c(8, 0, 0, 0), # marges extérieures
+    mar = c(15, 8, 0, 5), # marges intérieures (bas, gauche, haut, droite)
+    oma = c(9, 0, 0, 0), # marges extérieures
     mgp = c(2.3,  # proximité label et axe
             1,  # proximité ticks
             0)  # proximité axes
@@ -457,7 +457,7 @@ mutant_plot()
 
 
 ### **<font color='black'>Coexistence</font>** 
-$\small s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$
+$s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$
 
 ```{r, echo = F, cache = F}
 # Traits des 2 phénotypes testés
@@ -574,7 +574,7 @@ coex_plot <- function(xlab = NULL, ylab = NULL) {
     mfrow = c(3, 1),
     cex.axis = 1.3,  # taille des ticks labels
     cex.lab = 1.8,
-    mar = c(3.5, 7, 1, 7), # marges intérieures (bas, gauche, haut, droite)
+    mar = c(3.5, 10, 1, 9), # marges intérieures (bas, gauche, haut, droite)
     oma = c(2, 0, 0, 0), # marges extérieures
     mgp = c(2.3,  # proximité label et axe
             1,  # proximité ticks
