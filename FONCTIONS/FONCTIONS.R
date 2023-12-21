@@ -22,13 +22,12 @@ a_f <- function(x1, x2, sigma) {
 
 
 # Fitness d'invasion ------------------------------------------------------
-fitness_f <- function(x1, x2){
-  
+fitness_f <- function(x){
+  x1 <- x[1]
+  x2 <- x[2]
   r = 1
   s <- r*(1 - (a_f(x1, x2) * (k_f(x1) / k_f(x2))))
-  
   return(s)
-  
 }
 
 

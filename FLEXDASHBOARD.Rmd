@@ -40,20 +40,34 @@ text-align: justify}
 ## Column {data-width="500"}
 
 ### **<font color='black'>PRESENTATION</font>** 
+
+```{r, echo = F}
+img(src = "logo_rennes1.png", height = 140*.8, width = 300*.8)
+```
+
 Lien GitHub : <https://github.com/paquittet/SHINY> 
 
-Cette application a été réalisé dans le cadre de l'UE "Interface" dans le cadre du master MODE ('modélisation en écologie) de l'Université de Rennes. Cette application a été crée tout particulièrement pour les futurs étudiants de 2nd année du dit master MODE pour l'UE MDET (modèle déterministe) dans laquelle la dynamique évolutive est enseignée. L'objectif de ce travail est de développé une certaine sensibilité aux paramètres influençant la compétition entre phénotypes dans un paradigme de dynamique évolutive. Elle est constituée de deux pages pédagogiques : <Compétition à deux phénotypes> et <Compétition à n phénotypes> organisées autour d'un rappel sur la théorie mobilisée et des figures dont les paramètres sont manipulables pour explorer le rôle de chaque paramètre dans les équations sur lesquelles se fondent la modélisation de cette discipline. Une troisième page <Ressources> contient les documents ayant permis le développement de cette application Shiny ainsi que des ressources de dynamique évolutive.
+$\color{blue}{\text{A propos de l'application}}$  
 
-### **<font color='black'>DYNAMIQUE EVOLUTIVE</font>** 
+Cette application a été réalisée dans le cadre de l'UE "Interface" dans le cadre du master MODE ('modélisation en écologie) de l'Université de Rennes. Cette application a été crée tout particulièrement pour les futurs étudiants de deuxième année du dit master MODE pour l'UE MDET (modèle déterministe) dans laquelle la dynamique évolutive est enseignée. L'objectif de ce travail est de développer une certaine sensibilité aux paramètres influençant la compétition entre phénotypes dans un paradigme de dynamique évolutive. Elle est constituée de deux pages pédagogiques : *Compétition à deux phénotypes* et *Compétition à n phénotypes* organisées autour d'un rappel sur la théorie mobilisée et des figures dont les paramètres sont manipulables pour explorer le rôle de chaque paramètre dans les équations sur lesquelles se fondent la modélisation de cette discipline. Une troisième page <Ressources> contient les documents ayant permis le développement de cette application Shiny ainsi que des ressources de dynamique évolutive. Cette application est en début de développement, et constitue surtout pour le moment une grande fiche synthétique de révision des principaux concepts de dynamique évolutive.
 
-La dynamique adaptative est un cadre théorique permettant de modéliser l'évolution phénotypique. Elle permet de comprendre les conséquences à long-terme de petites mutations phénotypique sur la trajectoire évolutive des traits considérés. Ce cadre de recherche associe les méthodes de dynamique de population et les concepts de sélection fréquence-dépendance issue de la théorie des jeux (Maynard-Smith, 1973). La sélection fréquence-dépendance s'inscrit dans le paradigme de paysage adaptatif de fitness dynamique, où la fréquence des phénotypes dans la population influence la fitness de ces phénotypes.\
-La paradigme de modélisation classique utilisée consiste à considérer une population résidente et une population de mutant à faible densité dont le phénotype diffère légèrement de la population résidente.
+
+\
+$\color{blue}{\text{Qu'est ce que la dynamique évolutive ?}}$  
+La dynamique adaptative est un cadre théorique permettant de modéliser l'évolution phénotypique. Elle permet de comprendre les conséquences à long-terme de petites mutations phénotypique sur la trajectoire évolutive des traits considérés. Ce cadre de recherche associe les méthodes de dynamique de population et les concepts de sélection fréquence-dépendance issue de la théorie des jeux (Maynard-Smith, 1973). La sélection fréquence-dépendance s'inscrit dans le paradigme de paysage adaptatif de fitness dynamique, où la fréquence des phénotypes dans la population influence la fitness de ces phénotypes. La paradigme de modélisation classique utilisée consiste à considérer une population résidente et une population de mutant à faible densité dont le phénotype diffère légèrement de la population résidente.
 
 L'étude de la dynamique adaptative de phénotypes reposent sur deux idées fondamentales (Brännström et al., 2013) :\
 $\quad$ **(1)** la population résidente est supposée être en équilibre dynamique lorsque de nouveaux mutants apparaissent\
 $\quad$ **(2)** l'avenir de ces mutants peut être déduit de leur taux de croissance initial lorsqu'ils sont rares dans la population résidente  
 
-Plusieurs simplifications générales sont à considérées dans ce travail : (i) les phénotypes considérées ici ne varient que sur la gamme 0 et 2, (ii) le phénotype "optimal" est fixé à 1 et (iii) les nouveaux phénotypes en compétition se répartissent de façon symétrique et régulière autour de cette valeur optimale.
+\
+
+
+$\color{black}{\text{Bibliographie}}$   
+SMITH, J. Maynard et PRICE, George R. The logic of animal conflict. Nature, 1973, vol. 246, no 5427, p. 15-18.   
+
+BRÄNNSTRÖM, Åke, JOHANSSON, Jacob, et VON FESTENBERG, Niels. The hitchhiker’s guide to adaptive dynamics. Games, 2013, vol. 4, no 3, p. 304-328.
+
 
 # **Compétition à deux phénotypes**
 
@@ -75,6 +89,7 @@ width_widget = 200 # taille des widgets
                    width = width_widget
                    # width = width_widget
                  )
+                 
 # # X0                 
 #                  # Widget_slider : x_0
 #                  sliderInput(
@@ -92,7 +107,7 @@ width_widget = 200 # taille des widgets
                  sliderInput(
                    inputId = "lambda",
                    label = "$$\\lambda \\text{ [Forme]}$$",
-                   min = 0,
+                   min = 0.1,
                    max = 1,
                    step = 0.1,
                    value = 1,
@@ -101,12 +116,12 @@ width_widget = 200 # taille des widgets
                  )
                  
  # FONCTION a()                
-                   # Widget_slider : lambda
+                   # Widget_slider : sigma
                  sliderInput(
                    inputId = "sigma",
                    label = "$$\\sigma^2 \\text{ [Intensité compétition]}$$",
                    min = 0.01,
-                   max = 2,
+                   max = 1,
                    step = 0.01,
                    value = .5,
                    width = width_widget
@@ -154,10 +169,14 @@ Avec $n_i$ ($n_j$) la densité de population de $i$ ($j$) et $x$ ($y$) le phéno
 
 ### **<font color='black'>Fitness d'invasion</font>**  
 $\color{blue}{\text{Fitness d'invasion et gradient de sélection}}$  
-La **fitness d'invasion** $s(x, y)$  est définie comme le taux de croissance attendu d’un mutant $y$ initialement rare dans l’environnement défini par le résident $x$. La dérivée de cette fitness représente le **gradient de sélection** $D(x)$ aux alentours du point $x \approx y$ :
+La **fitness d'invasion** $s(x, y)$  est définie comme le taux de croissance attendu d’un mutant $y$ initialement rare dans l’environnement défini par le résident $x$ :
+
+$$s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$$
+
+La dérivée de cette fitness représente le **gradient de sélection** $D(x)$ aux alentours du point $x \approx y$ :
 
 $$
-(s(x, y))' = D(x) = \frac{\partial{s}(x, y)}{\partial{yx_j}}\Big|_{x=y}
+(s(x, y))' = D(x) = \frac{\partial{s}(x, y)}{\partial{y}}\Big|_{x=y}
 $$
 
 Le signe du gradient détermine la sélection du trait (si il est positif alors le trait est sélectionné, s'il est négatif, il est contre-sélectionné) et donc la direction du changement évolutif.    
@@ -187,11 +206,13 @@ $\color{blue}{\text{Hypothèses biologiques}}$
 
 - Populations monomorphiques 
 - Reproduction clonale
+- Valeurs phénotypiques varient dans l'intervalle $[0, 2]^i$
+- Valeur de trait optimal $x_0$ fixée à 1
 - Les différents phénotypes ont le même taux de croissance intrinsèque $r$
 - Population résidente à l'équilibre
 - Croissance dans la population comme proxy de la fitness
 - Compétition sur une unique ressource
-
+- Environnement spatialement homogène
 
 
 ## Column {data-width="500"}
@@ -266,11 +287,9 @@ $\large a(x, y) = e^{-\frac{1}{2}(x - y)^2/ \color{blue}{  \sigma ^2} }$
 ### **<font color='black'>PIP</font>** 
 ```{r, echo = F, cache = F}
 # Calcul équilibre
-# Reformatage de la fonction fitness
-# On modifie la valeur par défaut de Sigma
-
 ess_text <- renderText({
   
+  # ON REND LES FONCTIONS REACTIVES
   a_f <- function(x1, x2) {
     a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
     return(a)
@@ -291,7 +310,8 @@ ess_text <- renderText({
   }
 
   # ESS
-  ess <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2] 
+  # Calcul de la dérivée au point x0 (1, 1)
+  ess <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2]
   if(ess <= 0){
     value_ess <- "Stable"
   } else {
@@ -302,8 +322,9 @@ ess_text <- renderText({
 })
 
 
+# EQUILIBRE DE CONVERGENCE
 convergence_text <- renderText({
-  
+  # ON REND LES FONCTIONS REACTIVES
   a_f <- function(x1, x2) {
     a <- exp(-(1/2) * ((x1 - x2)^2)/ input$sigma) 
     return(a)
@@ -323,7 +344,8 @@ convergence_text <- renderText({
     return(s)
   }
 
-  # ESS
+  # Stabilité de convergence
+  # Calcul de la dérivée 
   convergence <- numDeriv::hessian(func = fitness_f, x = c(1, 1))[2,2] + numDeriv::hessian(func = fitness_f, x = c(1, 1))[1,2]
   if(convergence <= 0){
     
@@ -342,14 +364,14 @@ convergence_text <- renderText({
 
 ```
 
-$s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$
+$\color{blue}{\text{Fitness d'invasion}}$  
+$$\small s(x, y) = r \big[ 1 - a(x, y) \frac{K(x)}{K(y)} \big]$$
 
-o **Stabilité évolutive** (`r ess_text`) :   
-$\large \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x= \color{red}{x_0}}$ `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`  
+$\color{blue}{\text{Stabilité évolutive}}$ (`r ess_text` `r reactive({if(ess_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`) :   
+$$\small \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x= \color{red}{x_0}}$$ 
 
-
-o **Convergence évolutive** (`r convergence_text`) :  
-$\large \frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=\color{red}{x_0}}$ `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`
+$\color{blue}{\text{Stabilité de convergence}}$ (`r convergence_text` `r reactive({if(convergence_text() == "Stable"){paste("< 0")}else{paste("> 0")}})`)      
+$$\small \frac{\partial^2_s(x, y)}{\partial_{x} \partial_{y}} + \frac{\partial^2_s(x, y)}{\partial_{y^2}}\Big|_{y=x=\color{red}{x_0}}$$ 
 
 
 
@@ -372,6 +394,7 @@ k_f <- function(x) {
   return(k)
   
 }
+
 
 fitness_f <- function(x1, x2){
   r = 1
@@ -414,10 +437,10 @@ points(x = 1, y = 1, col = "red")
  # Paramètre graphique
   par(
     pty = "s",
-    cex.axis = 1.2,  # taille des ticks labels
-    cex.lab = 1.5,
-    mar = c(12, 5, 0, 3), # marges intérieures (bas, gauche, haut, droite)
-    oma = c(8, 0, 2, 0), # marges extérieures
+    cex.axis = 1,  # taille des ticks labels
+    cex.lab = 1.2,
+    mar = c(12, 7, 0, 5), # marges intérieures (bas, gauche, haut, droite)
+    oma = c(8, 0, 0, 0), # marges extérieures
     mgp = c(2.3,  # proximité label et axe
             1,  # proximité ticks
             0)  # proximité axes
@@ -604,7 +627,14 @@ width_widget = 200 # taille des widgets
 
 
 # NOMBRE DE PHENOTYPES
-                numericInput(inputId = "N", label = "Nombre de phénotypes", value = 5, min = 2, max = 50)
+numericInput(
+  inputId = "N",
+  label = "Nombre de phénotypes",
+  value = 10,
+  min = 2,
+  max = 50
+)
+
 #  FONCTION K 
                  # Widget_slider : K_0
                  sliderInput(
@@ -634,7 +664,7 @@ width_widget = 200 # taille des widgets
                  sliderInput(
                    inputId = "lambda_n",
                    label = "$$\\lambda \\text{ [Forme]}$$",
-                   min = 0,
+                   min = 0.1,
                    max = 1,
                    step = 0.1,
                    value = 1,
@@ -643,12 +673,12 @@ width_widget = 200 # taille des widgets
                  )
                  
  # FONCTION a()                
-                   # Widget_slider : lambda
+                   # Widget_slider : sigma
                  sliderInput(
                    inputId = "sigma_n",
                    label = "$$\\sigma^2 \\text{ [Intensité compétition]}$$",
                    min = 0.01,
-                   max = 2,
+                   max = 1,
                    step = 0.01,
                    value = .5,
                    width = width_widget
@@ -663,7 +693,6 @@ observe({input$reset_n
   updateNumericInput(inputId = "sigma_n", value = 0.5)
   updateNumericInput(inputId = "k0_n", value = 1)
   updateNumericInput(inputId = "lambda_n", value = 1)
-  updateNumericInput(inputId = "N", value = 5)
 
   })
 
@@ -674,15 +703,105 @@ observe({updateSliderInput(inputId = "lambda_n", max = input$k0)})
 
 
 
-## Column {data-width="500"}
+## Column {data-width="500" .tabset}
 
 ### **<font color='black'>Théorie</font>** 
-
+$\color{blue}{\text{Présentation du modèle}}$   
+Dans cette partie, nous allons généraliser la compétition entre $n$ phénotypes : 
 $$
 \frac{dn_i}{dt} = rn_i \Bigg[1 - \frac{\sum_{j = 1}^{N}a(x, y) n_j}{K(x )} \Bigg]
 $$
+\
+
+$\color{blue}{\text{Persistance des phénotypes}}$   
+Un phénotype est considéré comme persistant tant que sa proportion au temps $t$ de simulation ne descend pas en dessous de 1%. L'idée de cette partie de l'application est d'explorer comment les différents paramètres des fonctions $K(x)$, $a(x, y)$ et le nombre de phénotypes en compétition va impacter le nombre de phénotypes survivants et leur fréquence relative.  
+
+\
+
+$\color{blue}{\text{Hypothèses biologiques}}$  
+
+- Populations monomorphiques 
+- Reproduction clonale
+- Valeurs phénotypiques varient dans l'intervalle $[0, 2]^i$
+- Valeur de trait optimal $x_0$ fixée à 1
+- Répartition des phénotypes régulière et symétrique autour de $x_0$
+- Les différents phénotypes ont le même taux de croissance intrinsèque $r$
+- Population résidente à l'équilibre
+- Croissance dans la population comme proxy de la fitness
+- Compétition sur une unique ressource
+- Environnement spatialement homogène
 
 
+
+
+
+
+
+## Column {data-width="400"}
+
+### **<font color='black'>Fonction de ressources</font>** 
+
+$K(x) = \color{blue}{K_0} - \color{blue}{ \lambda } (x - x_0)^2$
+
+```{r, echo = F, cache = F}
+  xmin <- 0
+  xmax <- 2
+
+
+  renderPlot({
+  x <- seq(xmin, xmax, length.out = 100)
+
+  par(mar = c(6, 4, .5, 2), mgp = c(2.2, 1, .5))
+  plot(
+    x = x,
+    y = k_f(x = x, k0 = input$k0_n, x0 = 1, lambda = input$lambda_n),
+    lwd = 2,
+    col = "#7eb606",
+    ylim = c(0, input$k0_n),
+    xlim = c(0, 2),
+    type = "l",
+    xlab = latex2exp::TeX("x"),
+    ylab = latex2exp::TeX("K(x)"),
+    cex.lab = 1.2,
+    bty = "n"  # Supprime le cadre autour du plot
+  )
+})
+
+    
+```
+
+
+### **<font color='black'>Fonction de compétition</font>** 
+
+$\large a(x, y) = e^{-\frac{1}{2}(x - y)^2/ \color{blue}{  \sigma ^2} }$
+
+```{r, cache = F, echo = F}
+# Définition des valeurs de traits
+    x1 <- seq(xmin, xmax, length.out = 100)
+    x2 <- seq(xmax, xmin, length.out = 100)
+    
+    d = x1 - x2
+    
+    
+   
+    renderPlot({
+      # Aspect ratio = square
+  par(mar = c(6, 4, .5, 2), mgp = c(2.2, 1, .5))
+      
+   plot(
+      a_f(x1 = x1, x2 = x2, sigma = input$sigma_n) ~ d, 
+      lwd = 2,
+      col = "#CD3333",
+      ylim = c(0, 1),
+      xlim = c(-2, 2),
+      type = "l",
+      xlab = latex2exp::TeX("$x - y$"),
+      ylab = latex2exp::TeX("$a(x - y)$"),
+      cex.lab = 1.2,
+      bty = "n"
+    )
+})
+```
 
 ## Column {data-width="400"}
 ### **<font color='black'>Evolution des phénotypes</font>** 
@@ -778,7 +897,7 @@ params <- list(r = r, M = M)
 # RESOLUTION EDO
 sol <- deSolve::ode(y = n0, times = t, func = LV_trait, parms = params)
 
-seuil <- 0.01  # Définition du seuil de persistance
+seuil <- 0.03  # Définition du seuil de persistance
 
 # On définit 0 ou 1 la persistance au temps t de chaque phénotype
 sol <- as.data.frame(sol)
@@ -791,7 +910,7 @@ persis$Phenotype <- factor(persis$Phenotype, levels = 1:input$N)
 
 # Temps d'exctinction de chaque phénotype
 persis <- tapply(X = persis[, "persis"], INDEX = persis[, "Phenotype"], FUN = sum)
-colors <- ifelse(persis == max(t)+1, "white", "#292929")
+colors <- ifelse(persis >= max(t), "white", "#292929")
 
 # Paramètre graphique
 par(mar = c(4, 3, 1, 2),
@@ -800,12 +919,12 @@ par(mar = c(4, 3, 1, 2),
             0)
 )
 
-survivant(sum(persis == max(t)+1))
+survivant(sum(persis >= max(t)))
 
 barplot(persis,
         ylab = "Generation",
         xlab = NULL,
-        ylim = c(0, max(t)+1),
+        ylim = c(0, max(t)),
         names.arg = NA,
         col = colors)
 
@@ -832,6 +951,10 @@ barplot_survie
 
 ### **Documentation**
 
+```{r, echo = F}
+img(src = "logo_rennes1.png", height = 140*.8, width = 300*.8)
+```
+
 GitHub du projet : <https://github.com/paquittet/SHINY>  
 
 \
@@ -839,6 +962,8 @@ GitHub du projet : <https://github.com/paquittet/SHINY>
 $\color{blue}{\text{Dynamique évolutive}}$  
 
 Cours complet de Frédéric Hamelin (avec permission) : <https://github.com/paquittet/SHINY>
+
+Rapport de TP précisant la méthodologie : <https://github.com/paquittet/SHINY>
 
 Vidéo youtube : <https://www.youtube.com/watch?v=x3FnsyCq_0I>  
 
@@ -853,3 +978,5 @@ Tutoriel shiny : <https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index
 Tutoriel flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>
 
 Série de vidéos d'introduction à flexdashboard : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
+
+

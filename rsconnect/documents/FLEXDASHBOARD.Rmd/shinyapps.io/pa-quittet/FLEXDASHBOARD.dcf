@@ -5,7 +5,7 @@ account: pa-quittet
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10807755
-bundleId: 8054581
+bundleId: 8074487
 url: https://pa-quittet.shinyapps.io/FLEXDASHBOARD/
 version: 1
 asMultiple: FALSE
