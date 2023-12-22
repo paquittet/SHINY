@@ -1,0 +1,12 @@
+name: PIMP_MY_PIP
+title: PIMP_MY_PIP
+username: pa-quittet
+account: pa-quittet
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10837665
+bundleId: 8074563
+url: https://pa-quittet.shinyapps.io/PIMP_MY_PIP/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
