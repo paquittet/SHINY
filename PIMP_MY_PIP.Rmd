@@ -975,7 +975,8 @@ $\color{blue}{\text{Shiny / Flexdashboard}}$
 
 Tutoriel shiny : <https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html>
 
-Tutoriel flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>
+Tutoriels flexdashboard : <https://rstudio.github.io/flexdashboard/articles/shiny.html>  
+<https://pkgs.rstudio.com/flexdashboard/articles/layouts.html>
 
 Série de vidéos d'introduction à flexdashboard : <https://www.youtube.com/watch?v=HbkgAUOYvCY&list=PLBzwaVWPdZMuHsx3NUhGcd2H9RPeBajM_&index=3>
 
